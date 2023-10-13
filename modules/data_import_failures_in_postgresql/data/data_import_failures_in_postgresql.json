@@ -1,0 +1,146 @@
+{
+  "name": "data_import_failures_in_postgresql",
+  "description": "This incident type refers to situations where there are issues encountered when importing data into PostgreSQL. This can lead to failures and errors that prevent the successful importation of data. Troubleshooting and resolving data import issues can be challenging and require a detailed understanding of the system and its configuration. Common causes of data import failures in PostgreSQL include issues with data formatting, configuration issues, and data integrity problems. Resolving these issues typically requires careful analysis of error messages and logs, as well as close collaboration between developers and database administrators.",
+  "params": [
+    {
+      "name": "DESTINATION_PATH",
+      "value": ""
+    },
+    {
+      "name": "VERSION",
+      "value": ""
+    },
+    {
+      "name": "DATABASE_NAME",
+      "value": ""
+    },
+    {
+      "name": "TABLE_NAME",
+      "value": ""
+    },
+    {
+      "name": "FILE_PATH",
+      "value": ""
+    },
+    {
+      "name": "FILENAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Data Import Failures in PostgreSQL\nThis incident type refers to situations where there are issues encountered when importing data into PostgreSQL. This can lead to failures and errors that prevent the successful importation of data. Troubleshooting and resolving data import issues can be challenging and require a detailed understanding of the system and its configuration. Common causes of data import failures in PostgreSQL include issues with data formatting, configuration issues, and data integrity problems. Resolving these issues typically requires careful analysis of error messages and logs, as well as close collaboration between developers and database administrators."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if PostgreSQL service is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `service postgresql status`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check PostgreSQL logs for any error messages"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `tail -n 100 /var/log/postgresql/postgresql-${VERSION}.log`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify PostgreSQL configuration settings"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo -u postgres psql -c \"SHOW config_file;\"`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the integrity of the data being imported"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_dump_restore($DATABASE_NAME)"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Verify the permissions and ownership of the file being imported"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ls -l ${FILE_PATH}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check for any errors during the file transfer process"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `rsync -avz ${FILE_PATH} ${DESTINATION_PATH}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Data formatting issues: One possible root cause of data import failures in PostgreSQL is issues with data formatting. This can occur when data is not properly formatted for the database, or when there are inconsistencies in the data that prevent it from being imported correctly."
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_import_data($DATABASE_NAME, $TABLE_NAME, $FILE_PATH)"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Fix the data format in the file being imported so it's compatible with the target PostgreSQL database"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_import_data_pgsql($DATABASE_NAME, $TABLE_NAME, $FILENAME)"
+    }
+  ]
+}
