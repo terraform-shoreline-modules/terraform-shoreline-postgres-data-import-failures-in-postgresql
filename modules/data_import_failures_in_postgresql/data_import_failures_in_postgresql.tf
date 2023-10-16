@@ -1,7 +1,7 @@
 resource "shoreline_notebook" "data_import_failures_in_postgresql" {
   name       = "data_import_failures_in_postgresql"
   data       = file("${path.module}/data/data_import_failures_in_postgresql.json")
-  depends_on = [shoreline_action.invoke_dump_restore,shoreline_action.invoke_import_data,shoreline_action.invoke_import_data_pgsql]
+  depends_on = [shoreline_action.invoke_dump_restore,shoreline_action.invoke_import_data,shoreline_action.invoke_postgres_import]
 }
 
 resource "shoreline_file" "dump_restore" {
@@ -24,12 +24,12 @@ resource "shoreline_file" "import_data" {
   enabled          = true
 }
 
-resource "shoreline_file" "import_data_pgsql" {
-  name             = "import_data_pgsql"
-  input_file       = "${path.module}/data/import_data_pgsql.sh"
-  md5              = filemd5("${path.module}/data/import_data_pgsql.sh")
+resource "shoreline_file" "postgres_import" {
+  name             = "postgres_import"
+  input_file       = "${path.module}/data/postgres_import.sh"
+  md5              = filemd5("${path.module}/data/postgres_import.sh")
   description      = "Fix the data format in the file being imported so it's compatible with the target PostgreSQL database"
-  destination_path = "/tmp/import_data_pgsql.sh"
+  destination_path = "/tmp/postgres_import.sh"
   resource_query   = "host"
   enabled          = true
 }
@@ -48,19 +48,19 @@ resource "shoreline_action" "invoke_import_data" {
   name        = "invoke_import_data"
   description = "Data formatting issues: One possible root cause of data import failures in PostgreSQL is issues with data formatting. This can occur when data is not properly formatted for the database, or when there are inconsistencies in the data that prevent it from being imported correctly."
   command     = "`chmod +x /tmp/import_data.sh && /tmp/import_data.sh`"
-  params      = ["DATABASE_NAME","TABLE_NAME","FILE_PATH"]
+  params      = ["TABLE_NAME","DATABASE_NAME","FILE_PATH"]
   file_deps   = ["import_data"]
   enabled     = true
   depends_on  = [shoreline_file.import_data]
 }
 
-resource "shoreline_action" "invoke_import_data_pgsql" {
-  name        = "invoke_import_data_pgsql"
+resource "shoreline_action" "invoke_postgres_import" {
+  name        = "invoke_postgres_import"
   description = "Fix the data format in the file being imported so it's compatible with the target PostgreSQL database"
-  command     = "`chmod +x /tmp/import_data_pgsql.sh && /tmp/import_data_pgsql.sh`"
-  params      = ["DATABASE_NAME","TABLE_NAME","FILENAME"]
-  file_deps   = ["import_data_pgsql"]
+  command     = "`chmod +x /tmp/postgres_import.sh && /tmp/postgres_import.sh`"
+  params      = ["TABLE_NAME","DATABASE_NAME","FILENAME"]
+  file_deps   = ["postgres_import"]
   enabled     = true
-  depends_on  = [shoreline_file.import_data_pgsql]
+  depends_on  = [shoreline_file.postgres_import]
 }
 

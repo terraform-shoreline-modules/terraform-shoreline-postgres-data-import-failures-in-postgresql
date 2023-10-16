@@ -3,11 +3,7 @@
   "description": "This incident type refers to situations where there are issues encountered when importing data into PostgreSQL. This can lead to failures and errors that prevent the successful importation of data. Troubleshooting and resolving data import issues can be challenging and require a detailed understanding of the system and its configuration. Common causes of data import failures in PostgreSQL include issues with data formatting, configuration issues, and data integrity problems. Resolving these issues typically requires careful analysis of error messages and logs, as well as close collaboration between developers and database administrators.",
   "params": [
     {
-      "name": "DESTINATION_PATH",
-      "value": ""
-    },
-    {
-      "name": "VERSION",
+      "name": "TABLE_NAME",
       "value": ""
     },
     {
@@ -15,7 +11,7 @@
       "value": ""
     },
     {
-      "name": "TABLE_NAME",
+      "name": "FILENAME",
       "value": ""
     },
     {
@@ -23,7 +19,11 @@
       "value": ""
     },
     {
-      "name": "FILENAME",
+      "name": "VERSION",
+      "value": ""
+    },
+    {
+      "name": "DESTINATION_PATH",
       "value": ""
     },
     {
@@ -128,7 +128,7 @@
       "name": "cell_15",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_import_data($DATABASE_NAME, $TABLE_NAME, $FILE_PATH)"
+      "content": "host | host_name=$HOST_NAME | invoke_import_data($TABLE_NAME, $DATABASE_NAME, $FILE_PATH)"
     },
     {
       "name": "cell_16",
@@ -140,7 +140,7 @@
       "name": "cell_17",
       "type": "OP_LANG",
       "enabled": true,
-      "content": "host | host_name=$HOST_NAME | invoke_import_data_pgsql($DATABASE_NAME, $TABLE_NAME, $FILENAME)"
+      "content": "host | host_name=$HOST_NAME | invoke_postgres_import($TABLE_NAME, $DATABASE_NAME, $FILENAME)"
     }
   ]
 }
